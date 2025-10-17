@@ -1,0 +1,86 @@
+-- Step 1: Create database if not exists
+IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'BankingAnalytics')
+BEGIN
+    CREATE DATABASE BankingAnalytics;
+END;
+GO
+
+USE BankingAnalytics;
+GO
+
+-- Step 2: Drop tables if they exist (safe re-run)
+IF OBJECT_ID('dbo.Transactions', 'U') IS NOT NULL DROP TABLE dbo.Transactions;
+IF OBJECT_ID('dbo.Accounts', 'U') IS NOT NULL DROP TABLE dbo.Accounts;
+IF OBJECT_ID('dbo.Customers', 'U') IS NOT NULL DROP TABLE dbo.Customers;
+GO
+
+-- Step 3: Create Customers table
+CREATE TABLE dbo.Customers (
+    CustomerID VARCHAR(10) PRIMARY KEY,
+    CustomerName VARCHAR(50),
+    AccountType VARCHAR(20),
+    Branch VARCHAR(50),
+    JoinDate DATE,
+    Status VARCHAR(20)
+);
+GO
+
+-- Step 4: Create Accounts table
+CREATE TABLE dbo.Accounts (
+    AccountID VARCHAR(10) PRIMARY KEY,
+    CustomerID VARCHAR(10) FOREIGN KEY REFERENCES dbo.Customers(CustomerID),
+    AccountType VARCHAR(20),
+    OpeningBalance DECIMAL(12,2),
+    CurrentBalance DECIMAL(12,2),
+    LastTransactionDate DATE
+);
+GO
+
+-- Step 5: Create Transactions table
+CREATE TABLE dbo.Transactions (
+    TransactionID VARCHAR(10) PRIMARY KEY,
+    AccountID VARCHAR(10) FOREIGN KEY REFERENCES dbo.Accounts(AccountID),
+    TransactionDate DATE,
+    Type VARCHAR(20),
+    Amount DECIMAL(12,2),
+    Channel VARCHAR(20)
+);
+GO
+
+-- Step 6: Insert sample data into Customers
+INSERT INTO dbo.Customers (CustomerID, CustomerName, AccountType, Branch, JoinDate, Status)
+VALUES
+('C001', 'John Smith', 'Individual', 'Dubai', '2021-03-15', 'Active'),
+('C002', 'Sarah Johnson', 'Corporate', 'Abu Dhabi', '2020-07-09', 'Active'),
+('C003', 'Michael Brown', 'Individual', 'Sharjah', '2022-01-11', 'Active'),
+('C004', 'Emma Davis', 'Corporate', 'Dubai', '2021-09-22', 'Inactive'),
+('C005', 'David Miller', 'Individual', 'Abu Dhabi', '2023-05-02', 'Active');
+GO
+
+-- Step 7: Insert sample data into Accounts
+INSERT INTO dbo.Accounts (AccountID, CustomerID, AccountType, OpeningBalance, CurrentBalance, LastTransactionDate)
+VALUES
+('A1001', 'C001', 'Savings', 2500, 4200, '2024-12-20'),
+('A1002', 'C002', 'Current', 50000, 67000, '2025-02-05'),
+('A1003', 'C003', 'Savings', 1000, 850, '2025-01-25'),
+('A1004', 'C004', 'Current', 75000, 74000, '2024-07-11'),
+('A1005', 'C005', 'Savings', 1500, 5200, '2025-03-15');
+GO
+
+-- Step 8: Insert sample data into Transactions
+INSERT INTO dbo.Transactions (TransactionID, AccountID, TransactionDate, Type, Amount, Channel)
+VALUES
+('T001', 'A1001', '2024-11-15', 'Deposit', 2000, 'ATM'),
+('T002', 'A1001', '2024-12-20', 'Withdrawal', 300, 'Online'),
+('T003', 'A1002', '2025-01-20', 'Deposit', 10000, 'Branch'),
+('T004', 'A1002', '2025-02-05', 'Withdrawal', 3000, 'Online'),
+('T005', 'A1003', '2025-01-25', 'Withdrawal', 150, 'ATM'),
+('T006', 'A1004', '2024-07-11', 'Deposit', 4000, 'Branch'),
+('T007', 'A1005', '2025-03-15', 'Deposit', 5000, 'Online'),
+('T008', 'A1005', '2025-04-01', 'Withdrawal', 800, 'ATM');
+GO
+
+-- Step 9: Verify data
+SELECT * FROM dbo.Customers;
+SELECT * FROM dbo.Accounts;
+SELECT * FROM dbo.Transactions;
