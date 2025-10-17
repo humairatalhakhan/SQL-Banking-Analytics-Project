@@ -1,0 +1,121 @@
+/***********************************************
+ * SQL Banking Analytics - Queries.sql
+ * Author: Humaira Talha Khan
+ * Project: SQL Banking Analytics
+ * Description: Example analytics queries on
+ * Customers, Accounts, and Transactions tables
+ ***********************************************/
+
+/* =============================================
+   1️⃣ Total deposits and withdrawals per customer
+============================================= */
+SELECT 
+    c.CustomerName,
+    SUM(CASE WHEN t.Type = 'Deposit' THEN t.Amount ELSE 0 END) AS TotalDeposits,
+    SUM(CASE WHEN t.Type = 'Withdrawal' THEN t.Amount ELSE 0 END) AS TotalWithdrawals
+FROM Customers c
+JOIN Accounts a ON c.CustomerID = a.CustomerID
+JOIN Transactions t ON a.AccountID = t.AccountID
+GROUP BY c.CustomerName
+ORDER BY c.CustomerName;
+
+/* =============================================
+   2️⃣ Current balance per customer
+============================================= */
+SELECT 
+    c.CustomerName,
+    a.CurrentBalance
+FROM Accounts a
+JOIN Customers c ON a.CustomerID = c.CustomerID
+ORDER BY a.CurrentBalance DESC;
+
+/* =============================================
+   3️⃣ Current balance per branch
+============================================= */
+SELECT 
+    c.Branch,
+    SUM(a.CurrentBalance) AS TotalBalance
+FROM Accounts a
+JOIN Customers c ON a.CustomerID = c.CustomerID
+GROUP BY c.Branch
+ORDER BY TotalBalance DESC;
+
+/* =============================================
+   4️⃣ Top 3 customers by balance
+============================================= */
+SELECT TOP 3
+    c.CustomerName,
+    a.CurrentBalance
+FROM Accounts a
+JOIN Customers c ON a.CustomerID = c.CustomerID
+ORDER BY a.CurrentBalance DESC;
+
+/* =============================================
+   5️⃣ Total deposits and withdrawals per branch
+============================================= */
+SELECT 
+    c.Branch,
+    SUM(CASE WHEN t.Type='Deposit' THEN t.Amount ELSE 0 END) AS TotalDeposits,
+    SUM(CASE WHEN t.Type='Withdrawal' THEN t.Amount ELSE 0 END) AS TotalWithdrawals
+FROM Customers c
+JOIN Accounts a ON c.CustomerID = a.CustomerID
+JOIN Transactions t ON a.AccountID = t.AccountID
+GROUP BY c.Branch
+ORDER BY c.Branch;
+
+/* =============================================
+   6️⃣ Monthly transaction trend (total count & amount)
+============================================= */
+SELECT 
+    FORMAT(TransactionDate, 'yyyy-MM') AS Month,
+    COUNT(*) AS TotalTransactions,
+    SUM(Amount) AS TotalAmount
+FROM Transactions
+GROUP BY FORMAT(TransactionDate, 'yyyy-MM')
+ORDER BY Month;
+
+/* =============================================
+   7️⃣ Average transaction amount per customer
+============================================= */
+SELECT 
+    c.CustomerName,
+    AVG(t.Amount) AS AvgTransactionAmount
+FROM Customers c
+JOIN Accounts a ON c.CustomerID = a.CustomerID
+JOIN Transactions t ON a.AccountID = t.AccountID
+GROUP BY c.CustomerName
+ORDER BY AvgTransactionAmount DESC;
+
+/* =============================================
+   8️⃣ Number of active vs inactive customers
+============================================= */
+SELECT 
+    Status,
+    COUNT(*) AS CustomerCount
+FROM Customers
+GROUP BY Status;
+
+/* =============================================
+   9️⃣ Customers with no transactions in last 6 months
+============================================= */
+SELECT 
+    c.CustomerName,
+    MAX(t.TransactionDate) AS LastTransaction
+FROM Customers c
+JOIN Accounts a ON c.CustomerID = a.CustomerID
+LEFT JOIN Transactions t ON a.AccountID = t.AccountID
+GROUP BY c.CustomerName
+HAVING MAX(t.TransactionDate) < DATEADD(MONTH, -6, GETDATE())
+   OR MAX(t.TransactionDate) IS NULL;
+
+/* =============================================
+   🔟 Total deposits and withdrawals per account type
+============================================= */
+SELECT 
+    a.AccountType,
+    SUM(CASE WHEN t.Type='Deposit' THEN t.Amount ELSE 0 END) AS TotalDeposits,
+    SUM(CASE WHEN t.Type='Withdrawal' THEN t.Amount ELSE 0 END) AS TotalWithdrawals
+FROM Accounts a
+JOIN Transactions t ON a.AccountID = t.AccountID
+GROUP BY a.AccountType
+ORDER BY a.AccountType;
