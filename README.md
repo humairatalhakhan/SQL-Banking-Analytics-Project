@@ -3,6 +3,8 @@
 An **SQL Server banking analytics project** analyzing customer deposits, accounts, and transaction activities.  
 Turn raw banking data into actionable insights using **SQL queries, relational tables, and trend analysis**.
 
+<img width="952" height="936" alt="SQL Screen" src="https://github.com/user-attachments/assets/124f7f6a-a3c1-479f-af3d-3924a605bbd9" />
+
 ---
 
 ## 📊 Project Overview
